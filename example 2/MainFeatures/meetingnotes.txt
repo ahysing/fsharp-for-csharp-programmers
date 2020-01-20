@@ -1,0 +1,3 @@
+This program demonstrates the key features over Object Oriented Programming; Higher order functions and immutability.
+In F# all variables are immutable. They are set on creation, and can never change again.
+You can still change a value after a variable is declared, but you have to explicitly ask for it.
