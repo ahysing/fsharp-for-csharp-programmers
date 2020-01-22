@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="mono_crash.8682cc0d8.0.json" />
+    <None Remove="mono_crash.mem.83124.1.blob" />
+  </ItemGroup>
+</Project>
