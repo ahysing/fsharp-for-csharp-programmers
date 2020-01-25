@@ -16,7 +16,7 @@ namespace DependencyInjection.CSharp
             var database = container.Resolve<IDatabase>();
             for (int i = 0; i < 3; i++)
             {
-                Console.WriteLine("Document ID: ", database.GetDocumentId());
+                Console.WriteLine("Document ID: " + database.NextDocumentId());
             }
         }
     }
