@@ -2,12 +2,12 @@
 
 type Document = { Id:int32 }
 
-type IProvider =
+type IDatabase =
     abstract member Lookup: int32 -> Document
- 
-type Provider() =
 
-    interface IProvider with
+type Database() =
+
+    interface IDatabase with
         member x.Lookup(documentId:int32) =
             let document = { Id=documentId }
             document
@@ -16,9 +16,9 @@ type Provider() =
 [<EntryPoint>]
 let main argv =
     printfn "Hello World from F#!"
-    let instance = Provider()
+    let instance = Database()
 
-    let lookupFunction = registerInterface<IProvider, Provider>(instance)
+    let lookupFunction = registerInterface<IDatabase, Database>(instance)
     let result = lookupFunction()
     match result with
         | Instance instanceRightBack ->
