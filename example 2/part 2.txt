@@ -9,11 +9,14 @@ You can still change a value after a variable is declared, but you have to expli
 "
 
 3. create a function
+```
     let start = 1
     let limit = 10
     printNumbers(start, limit)
-    
-...
+```
+
+above main() put in
+```
 let rec printNumbers (i:int32, limit:int32) =
     if i < limit then
         printf " %d" i
@@ -21,3 +24,4 @@ let rec printNumbers (i:int32, limit:int32) =
         printNumbers(next, limit)
     else
         ()
+```

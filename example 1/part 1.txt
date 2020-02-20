@@ -1,1 +1,2 @@
-create a new console app in F# with visual studio. Look at the defaults
+create a new console app in F# with visual studio.
+Hello world easily set up by choosing the template "Console Application" and choosing F# in the language dropdown. The rest ships with .net and visual studio out of the box.  
