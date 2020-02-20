@@ -1,0 +1,8 @@
+Here we present a simple domain model in C#.
+
+1. open Domain.CSharp.Model in Visual studio and have a look at it
+
+2. Create a new solution Domain.Model in Visual studio.
+3. Add a type Customer taking in firstName and lastName as custructor parameters
+4. Add a record type Person taking with fields ID and Name
+5. Create main.

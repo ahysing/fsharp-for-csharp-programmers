@@ -1,0 +1,23 @@
+1. Create a variable x
+"
+This program demonstrates the key features over Object Oriented Programming; Higher order functions and immutability.
+"
+2. Create an immutable variable y
+"
+In F# all variables are immutable. They are set on creation, and can never change again.
+You can still change a value after a variable is declared, but you have to explicitly ask for it.
+"
+
+3. create a function
+    let start = 1
+    let limit = 10
+    printNumbers(start, limit)
+    
+...
+let rec printNumbers (i:int32, limit:int32) =
+    if i < limit then
+        printf " %d" i
+        let next = i + 1
+        printNumbers(next, limit)
+    else
+        ()

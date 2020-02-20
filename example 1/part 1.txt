@@ -1,0 +1,1 @@
+create a new console app in F# with visual studio. Look at the defaults

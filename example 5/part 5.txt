@@ -1,0 +1,113 @@
+1. Intro
+"
+We just solved the Inversion of Control by a clever use of a function returning a new function.
+
+There are some challenges.
+A proper dependency injection framework, such as Autofac, brings more flexibility than this. We are not able to inject constructor parameters at runtime. Of course building an industry level robust dependency injection framework is a tremendous effort. If one would tackle this problem, and write a dependency injection framework with flexibility to register instances with different constructors and parameters, one would quickly see that the functional approach would come short.
+A single function is just not able to encapsulate the variation of all the constructors one could create in C#.
+
+It is natural to start asking oneself. Can we approach this in a different way?
+Maybe the whole idea of a Dependency injection framework is a relic from from Object Oriented Programming.
+Lets us think about it.
+
+
+So what does Inversion of Control give us? It gives us contract between caller and callee. It does so by using interfaces.
+
+In functional programming we can achieve the same contract with functions. we can agree on what the function should look like, and let the implementation details be up to the implementer.
+We can inject the the implementation details as functions to new functions.
+Let's see an example.
+
+2. Paste in the block to top of Program.fs
+
+```
+// Learn more about F# at http://fsharp.org
+// Bookshelf is now a type pointing to a function
+//
+// on the right hand side of =
+// we have a function taking in a int32 and returning a list of int32
+//
+// Bookshelf is checked as compile time
+// It serves as a replacement for an interface
+type Bookshelf = int32 -> int32 list
+
+let reserveBookshelf iterator capacity  = // (unit -> int32) -> int -> int32 list
+    let ienumerableDocumentIds = seq {
+        for _ in 0..capacity do
+            let documentId = iterator()
+            yield documentId
+    }
+    Seq.toList<int32> ienumerableDocumentIds
+
+```
+"
+First out we define a new type Bookshelf. This type is our contract, or interface you might say.
+If you read the definition you can see that it is a function taking in an integer returning a list of integers.
+
+reserveBookshelf under it it takes in two parameters iterator and capacity. Unlike C# can use it with one or two parameters.
+If we use it with one argument we would get a new function back taking in only capacity. If we just had an iterator.
+If we just could pass inn a function taking nothing returning an integer we would follow the contract and return a Bookshelf back.
+This is called partial application.
+"
+
+
+
+3. Create a file SQLite.fs. Copy in SQLite.fs's content.
+"
+next out we want a persistent SQLite database to put our books.
+
+Now let's see if we can glue the two parts together without mentioning SQLite to the caller.
+"
+
+
+
+4. Paste into the end of Program.fs
+```
+
+let createReserveBookshelf() =
+    let fileName = "database.sqlite"    
+    let connectionString = SQLite.setup fileName
+    let getNextFromSQLite() = // () -> int32
+        // connectionString is declared in factory().
+        // we can pass getNextFromSQLite() on to other functions,
+        // but the value of connectionString below is lives inside the scope of
+        // createReserveBookshelf(). It is not garbage collected.
+        //
+        // This way of storing values inside functions is called clojure.
+        SQLite.NextDocumentId(connectionString)
+
+    // notice how the function below is missing parameter capacity
+    (reserveBookshelf getNextFromSQLite)
+    
+[<EntryPoint>]
+let main argv =
+    printfn "Hello World from F#!"
+    
+    // this assignment proves that Bookshelf contract is met
+    let bookshelfOnSQLite:Bookshelf = createReserveBookshelf()
+    let documentIds = (bookshelfOnSQLite 10)
+
+    printfn "These are the 10 new Document-IDs we just reserved"
+    for documentId in documentIds do
+        printf "%d " documentId
+    printfn ""
+
+    0 // return an integer exit code
+```
+"
+This is complex but bear with me. createReserveBookshelf is a factory function.
+getNextFromSQLite gets the next document ID as integer from a SQLite database. It is defined here *pointing*.
+
+
+The Bookshelf type is not tightly coupled to the SQL database. The glue happened inside createReserveBookshelf.
+We just achieved Inversion of Control without classes or interfaces, but with partial application and clojures.
+Thereby replacing Dependency Injection all together.
+
+We have proven that you can bring along all the Patterns and Practices you are used to from OOP, they have to be adapted to F#.
+
+Keep in mind that this is the most advanced techniques I could think ofMost F# programs does not apply partial application or clojures.
+If you are exited to learn more about F# look out for the blog to Mark Seemann and the web site F sharp for fun and profit.
+These sites thought me all the code I showed you today.
+Mark is also coming to NDC Oslo this year. You should attend his talk.
+
+Thank you.
+"

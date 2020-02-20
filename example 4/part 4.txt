@@ -1,0 +1,107 @@
+Now we are looking into Dependency Injection
+
+1. Open DependencyInjection.CSharp.
+ * Have a look at IDatabase.
+    - Explain how SQLite implements IDatabase and gives Inversion of Control.
+    - Explain how we don't write new SQLite a single place.
+    - implementation details are all contained in the Dependency Injection framwork.
+    - This gives flexibility to replace SQLite with something else implementing IDatabase
+ * Have a look at Program.cs
+    - Note that Autofac is used to create new instances.
+    - By calling Register on container builder we tell the system that our IDatabase is an instance of SQLite
+
+2. create a project in Visual Studio called DependencyInjection.FSharp
+
+3. Create a type Document
+```
+type Document = { Id:int32 }
+```
+
+4. Create an interface IDatabase and a type Database
+```
+
+type IDatabase =
+    abstract member Lookup: int32 -> Document
+ 
+type Database() =
+
+    interface IDatabase with
+        member x.Lookup(documentId:int32) =
+            let document = { Id=documentId }
+            document
+
+```
+
+
+5. "
+We could easily use the Autofac package.
+However because Autofac throws C# excptions as a side effect it does not feel very F#.
+In addition the learning effect is also go by using other peoples code over again.
+
+Let's create our own."
+
+6. Create a new module ContainerService.fs and paste in
+```
+let private typeMapping = new Dictionary<Type, Object>()
+```
+"
+First create old C# Dictionary to contain our instance at runtime.
+"
+
+7.
+```
+let private lookupByGeneric<'I, 'IType> () =
+    let typeOfI = typeof<'I>
+    if typeMapping.ContainsKey(typeOfI) then
+        let instanceAtRuntime = typeMapping.[typeOfI]
+        (Instance instanceAtRuntime)
+    else
+        // Instead of throwing an exception we return a NotRegistered 
+        NotRegistered
+```
+"
+lookupByGeneric looks at the runtime type and returns the value in the Dictionary.
+If the Dictionary key is not present we return "NotRegistered".
+How is that even possible?
+"
+
+8. We need a type InstanceOrError
+```
+type InstanceOrError =
+    | Instance of Object
+    | NotRegistered
+```
+"""
+This thing is called a discriminiated union. It is either an instance of object or an error.
+NotRegistered is another flavor of error handling. Instead of C# exceptions we all errors as a separte type.
+"""
+
+9." In the end we put instances into the Dictionary by creating a function registerInterface "
+```
+let registerInterface<'I, 'IType> (instance : 'IType) : (unit -> InstanceOrError) =
+    let typeOfI = typeof<'I>
+    typeMapping.[typeOfI] <- instance
+    // Return the lookup function
+    lookupByGeneric<'I, 'IType>
+```
+"
+This block takes in an interface and returns a function taking no input and returing InstanceOrError. What is InstanceOrError?
+"
+
+
+10. Back in main we start using registerInterface to put in our Database. Then we look it up.
+````
+[<EntryPoint>]
+let main argv =
+    printfn "Hello World from F#!"
+    let instance = Database()
+
+    let lookupFunction = registerInterface<IDatabase, Database>(instance)
+    let result = lookupFunction()
+    match result with
+        | Instance instanceRightBack ->
+            printfn "This lookup function returned a %A" instanceRightBack
+        | NotRegistered _ ->
+            printfn "List type IProvider is not registered!"
+    0 // return an integer exit code
+```
